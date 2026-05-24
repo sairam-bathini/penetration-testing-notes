@@ -1,488 +1,512 @@
-**Web Application Penetration Testing:**
+# Web Application Penetration Testing - Industry Approach with IDOR Demonstration
 
+## Overview
 
+In this session, we will learn how professional penetration testers approach a web application security assessment.
 
-In this session, we will learn how professional penetration testers approach a web application assessment. Rather than immediately searching for vulnerabilities, we will first understand the application, identify user roles, map functionality, create a testing strategy, and then perform a practical IDOR (Insecure Direct Object Reference) assessment using Burp Suite and OWASP Juice Shop.
+Rather than immediately searching for vulnerabilities, we will first:
 
+* Understand the application
+* Identify user roles
+* Map application functionality
+* Create a testing strategy
+* Perform a practical IDOR (Insecure Direct Object Reference) assessment using Burp Suite and OWASP Juice Shop
 
+The goal is to demonstrate how penetration testing is performed in real-world environments rather than simply showcasing a vulnerability.
 
-**Agenda**
+---
 
+# Agenda
 
+1. What is Penetration Testing?
+2. Why Organizations Perform Penetration Testing
+3. Real-World Penetration Testing Lifecycle
+4. Introduction to OWASP Juice Shop
+5. Application Mapping
+6. HTTP Fundamentals
+7. API Identification and Analysis
+8. Creating a Test Plan
+9. Understanding IDOR
+10. Practical IDOR Demonstration
+11. Reporting the Finding
+12. Tips for Aspiring Penetration Testers
 
-1\. What is Penetration Testing?
+---
 
-2\. Why Organizations Perform Penetration Testing
+# Prerequisites
 
-3\. Real-World Penetration Testing Lifecycle
+Participants should have a basic understanding of:
 
-4\. Understanding OWASP Juice Shop
+* Client-Server Architecture
+* HTTP Requests and Responses
+* Web Browsers
+* Basic Cybersecurity Terminology
 
-5\. Application Mapping
+---
 
-6\. IDOR Vulnerability Theory
+# Lab Environment
 
-7\. IDOR Practical Demonstration using Burp Suite
+## Client
 
-8\. Reporting the Finding
+* Google Chrome Browser
 
-\---------------------------------------------------------------------------------------------------------------
+## Proxy
 
-**Pre-requisites:** Client - Server model, Basic Terminologies
+* Burp Suite Community/Professional
 
+## Server
 
+* AWS EC2 Instance
 
-Client (From where you are accessing the application): Chrome Browser
+## Vulnerable Application
 
-Request (to)
+* OWASP Juice Shop
+* Hosted using Docker
 
-+Burpsuite (proxy)
+### Request Flow
 
-Server: AWS EC2 instance
+```text
+Browser
+   ↓
+Burp Suite Proxy
+   ↓
+OWASP Juice Shop (AWS EC2)
+   ↓
+Response
+   ↓
+Browser
+```
 
-Response (from)
+---
 
-
-
-**OWASP Juice Shop:** 
-
-
-
-**E-commerce application:** OWASP Juice Shop (Vulnerable) Open-source (Hosted on AWS using Docker Image of Juice Shop)
-
-**Tools Used:** Burp Suite (Proxy Tool)
-
-\---------------------------------------------------------------------------------------------------------------
-
-**What is Penetration Testing? (Public Facing: Crown Jewels)**
-
-
+# What is Penetration Testing?
 
 Penetration Testing is the process of simulating real-world attacks against an application to identify security weaknesses before attackers can exploit them.
 
+### Objective
 
+The objective is NOT to break the application.
 
-The objective is **not to break the application**.
+The objective is to:
 
+* Identify security risks
+* Assess business impact
+* Provide remediation guidance
+* Improve overall security posture
 
+---
 
-The objective is to **identify security risks** and provide remediation guidance.
+# Why Organizations Perform Penetration Testing
 
-\---------------------------------------------------------------------------------------------------------------
+Organizations conduct penetration testing to:
 
-**Why Organizations Perform Penetration Testing?**
+* Identify vulnerabilities before attackers
+* Meet compliance requirements
+* Protect customer data
+* Protect business reputation
+* Improve overall security posture
 
+---
 
+# Real-World Penetration Testing Lifecycle
 
-To:
+## Step 1: Understand the Business
 
+Before testing begins, understand:
 
+* What does the application do?
+* Who are the users?
+* What are the critical business workflows?
+* What data is considered sensitive?
 
-Identify vulnerabilities before attackers
+---
 
-Meet compliance requirements
+## Step 2: Define Scope
 
-Protect customer data
+### In Scope
 
-Protect business reputation
+* Application URLs
+* APIs
+* Mobile APIs (if applicable)
 
-Improve overall security posture
+### Out of Scope
 
-\---------------------------------------------------------------------------------------------------------------
+* Production Databases
+* Third-Party Integrations
+* Support Portals
+* External Systems
 
-**How to do Penetration Testing?**
+---
 
+## Step 3: Obtain Test Accounts
 
+Example Roles:
 
-Before testing, professional penetration testers perform several activities.
+* Customer User
+* Support User
+* Administrator
 
+---
 
+## Step 4: Create a Role Matrix
 
-**Step 1: Understand the Business**
+| Function      | Support | Customer | Admin |
+| ------------- | ------- | -------- | ----- |
+| Login         | Yes     | Yes      | Yes   |
+| View Orders   | No      | Yes      | Yes   |
+| Delete Orders | No      | No       | Yes   |
 
+This matrix becomes the foundation for Authorization Testing.
 
+---
 
-Questions:
+# Introduction to OWASP Juice Shop
 
+OWASP Juice Shop is an intentionally vulnerable e-commerce application designed for security training and penetration testing practice.
 
+### Demonstration Areas
 
-What does the application do?
+* User Registration
+* User Login
+* Product Browsing
+* Shopping Basket
+* Order History
+* User Profile
 
-Who are the users?
+---
 
-What are the critical workflows?
+# Application Mapping
 
-What data is sensitive?
+## Configure Burp Suite
 
+1. Configure Browser Proxy
+2. Intercept Requests
+3. Browse the Application
+4. Analyze Traffic
 
+### Key Areas to Observe
 
-**Step 2: Define Scope**
+* Site Map
+* HTTP History
+* Endpoints
+* APIs
+* Authentication Mechanisms
 
+### Important Mindset
 
-
-Examples:
-
-
-
-In Scope:
-
-\* Application URL
-
-\* APIs
-
-
-
-Out of Scope:
-
-\* Production databases
-
-\* Third-party integrations
-
-\* Support pages
-
-
-
-**Step 3: Obtain Test Accounts**
-
-
-
-Examples:
-
-Customer User
-
-Admin User
-
-Support User
-
-
-
-**Step 4: Create a Role Matrix**
-
-
-
-| Function      | Suppt | Customer | Admin |
-
-| ------------- | ----- | -------- | ----- |
-
-| Login         | Yes   | Yes      | Yes   |
-
-| View Orders   | No    | Yes      | Yes   |
-
-| Delete Orders | No    | No       | Yes   |
-
-
-
-This matrix serves as the foundation for authorisation testing.
-
-\---------------------------------------------------------------------------------------------------------------
-
-**Start with Demo: Introduction to OWASP Juice Shop**
-
-
-
-Demonstrate:
-
-
-
-\* Registration
-
-\* Login
-
-\* Product browsing
-
-\* Order history
-
-\---------------------------------------------------------------------------------------------------------------
-
-**Application Mapping**
-
-
-
-Open Burp Suite.
-
-Configure Proxy.
-
-Browse the application.
-
-
-
-Explain:
-
-Site Map
-
-HTTP History
-
-Endpoints
-
-API Calls
-
-
-
-**Common API Indicators**
-
-
-
-When you see:
-
-
-
-/api/
-
-/v1/
-
-/v2/
-
-/graphql
-
-/rest
-
-
-
-It is usually an API endpoint.
-
-
-
-Examples:
-
-
-
-/api/users
-
-/api/orders
-
-/api/products
-
-/api/basket
-
-
-
-**HTTP Methods:**
-
-Method	Purpose
-
-GET	Read Data
-
-POST	Create Data
-
-PUT	Update Data
-
-PATCH	Partial Update
-
-DELETE	Delete Data
-
-
-
-**Status Codes:**
-
-Code	Meaning
-
-200	Success
-
-201	Created
-
-401	Unauthorized (Authentication Required)
-
-403	Forbidden (Authenticated but Not Authorized)
-
-404	Not Found (The requested resource does not exist)
-
-500	Server Error
-
-
-
-As a penetration tester, we are not looking for vulnerabilities yet.
-
-
+At this stage, we are NOT looking for vulnerabilities.
 
 We are trying to understand how the application works.
 
-\---------------------------------------------------------------------------------------------------------------
+---
 
-**Creating a Test Plan**
+# HTTP Fundamentals
 
+## Common HTTP Methods
 
+| Method | Purpose               |
+| ------ | --------------------- |
+| GET    | Retrieve Data         |
+| POST   | Create Data           |
+| PUT    | Update Data           |
+| PATCH  | Partially Update Data |
+| DELETE | Delete Data           |
 
-**Possible Test Categories:**
+---
 
+## Common HTTP Status Codes
 
+| Code | Meaning                          |
+| ---- | -------------------------------- |
+| 200  | Success                          |
+| 201  | Resource Created                 |
+| 401  | Authentication Required          |
+| 403  | Authenticated but Not Authorized |
+| 404  | Resource Not Found               |
+| 500  | Internal Server Error            |
 
-Authentication Testing
+### Authentication vs Authorization
 
-Authorization Testing
+#### 401 Unauthorized
 
-Session Management Testing
+The application does not know who you are.
 
-Business Logic Testing
+Example:
 
-API Security Testing
+```http
+GET /api/orders/1001
+```
 
-Input Validation Testing
+Without a valid session or token:
 
+```http
+HTTP/1.1 401 Unauthorized
+```
 
+---
 
-For this session, we will focus on Authorisation Testing.
+#### 403 Forbidden
 
-\---------------------------------------------------------------------------------------------------------------
+The application knows who you are but does not allow access.
 
-**Understanding IDOR**
+Example:
 
+User A attempts to access User B's order.
 
+```http
+HTTP/1.1 403 Forbidden
+```
+
+---
+
+#### 404 Not Found
+
+The requested resource does not exist or is intentionally hidden.
+
+```http
+HTTP/1.1 404 Not Found
+```
+
+---
+
+# API Identification
+
+## Common API Indicators
+
+```text
+/api/
+/v1/
+/v2/
+/graphql
+/rest
+```
+
+Examples:
+
+```text
+/api/users
+/api/orders
+/api/products
+/api/basket
+```
+
+---
+
+# Understanding HTTP Requests
+
+Whenever you intercept a request, analyze:
+
+### 1. HTTP Method
+
+```http
+GET
+POST
+PUT
+PATCH
+DELETE
+```
+
+### 2. URL Path
+
+Example:
+
+```http
+/api/orders/1001
+```
+
+### 3. Query Parameters
+
+Example:
+
+```http
+/api/orders?id=1001
+```
+
+Questions:
+
+* What does the ID represent?
+* Can it be modified?
+* Does it reference another user?
+
+### 4. Headers
+
+Examples:
+
+```http
+Authorization:
+Cookie:
+Content-Type:
+Origin:
+```
+
+### 5. Request Body
+
+Example:
+
+```json
+{
+  "userId": 123
+}
+```
+
+---
+
+# Creating a Test Plan
+
+## Possible Testing Categories
+
+* Authentication Testing
+* Authorization Testing
+* Session Management Testing
+* Business Logic Testing
+* API Security Testing
+* Input Validation Testing
+
+For this session, we will focus on Authorization Testing.
+
+---
+
+# Understanding IDOR
+
+## What is IDOR?
 
 IDOR stands for Insecure Direct Object Reference.
 
+It occurs when an application exposes references to internal objects without properly validating authorization.
 
+---
 
-It occurs when an application exposes references to internal objects without properly validating user authorization.
+## Example
 
+User A accesses:
 
-
-**Example:**
-
-
-
-User A can access:
-
-
-
+```text
 /orders/1001
+```
 
+User A modifies the identifier:
 
-
-If User A changes the identifier to:
-
-
-
+```text
 /orders/1002
+```
 
+If the application returns another user's data, an IDOR vulnerability exists.
 
+---
 
-and gains access to another user's data, an IDOR vulnerability exists.
+## Impact
 
+* Data Exposure
+* Privacy Violations
+* Unauthorized Access
+* Regulatory Compliance Issues
 
+---
 
-Impact:
+# Practical Demonstration
 
+## Step 1
 
+Create User A
 
-\* Data Exposure
+## Step 2
 
-\* Privacy Violations
+Create User B
 
-\* Unauthorized Access
+## Step 3
 
-\* Compliance Issues
+Login as User A
 
-\---------------------------------------------------------------------------------------------------------------
+## Step 4
 
-Practical Demonstration
+Intercept traffic using Burp Suite
 
+## Step 5
 
+Identify user-specific requests
 
-Create User A.
+Examples:
 
+* User ID
+* Basket ID
+* Order ID
+* Address ID
 
+## Step 6
 
-Create User B.
+Send the request to Repeater
 
+## Step 7
 
+Modify the identifier
 
-Login as User A.
+## Step 8
 
+Observe the response
 
+## Questions to Ask
 
-Intercept traffic using Burp Suite.
+* Can User A access User B's data?
+* Can User A modify User B's data?
+* Can User A delete User B's data?
 
+---
 
+# Reporting the Finding
 
-Navigate to a feature that references user-specific data.
-
-
-
-Send the request to Repeater.
-
-
-
-Can User A access User B's data?
-
-
-
-**Identify:**
-
-
-
-\* User ID
-
-\* Basket ID
-
-\* Order ID
-
-\* Resource Identifier
-
-
-
-**Modify the identifier.**
-
-
-
-Observe the response.
-
-\---------------------------------------------------------------------------------------------------------------
-
-**Reporting the Finding**
-
-
-
-Title:
+## Title
 
 Insecure Direct Object Reference (IDOR)
 
-
-
-Severity:
+## Severity
 
 High
 
+## Description
 
+The application fails to validate whether the authenticated user is authorized to access the requested resource.
 
-Description:
+## Impact
 
-The application fails to verify whether the authenticated user is authorised to access the requested resource.
+An attacker may gain unauthorized access to sensitive information belonging to other users.
 
+## Recommendation
 
+Implement server-side authorization checks for every object access request.
 
-Impact:
+## Evidence
 
-An attacker may access data belonging to other users.
+Include:
 
+* Request
+* Response
+* Screenshots
+* Reproduction Steps
 
+---
 
-Recommendation:
+# Tips for Aspiring Penetration Testers
 
-Implement server-side authorisation validation for every object access request.
+* Never start testing before understanding the application.
+* Spend time learning how the application works.
+* Create a Role Matrix before performing authorization testing.
+* Understand APIs because modern applications are API-driven.
+* Focus on business workflows, not just vulnerabilities.
+* Use tools to assist your work, not replace your thinking.
+* Always validate findings before reporting.
+* Think like a legitimate user first, then think like an attacker.
 
+---
 
+# Key Takeaway
 
-Evidence:
+A professional penetration tester does not start by looking for vulnerabilities.
 
-Include request, response, screenshots, and reproduction steps.
+A professional penetration tester starts by understanding:
 
+* The business
+* The users
+* The workflows
+* The application architecture
 
-
-\---------------------------------------------------------------------------------------------------------------
-
-**Important Tips for Aspiring Penetration Testers**
-
-
-
-Never start testing before understanding the application.
-
-Create a role matrix before authorization testing.
-
-Understand APIs because modern applications are API-driven.
-
-Use tools to assist your work, not to replace your thinking.
-
-Always validate findings before reporting.
-
-Think like a legitimate user first, then think like an attacker.
-
+Only then do they begin identifying security weaknesses.
